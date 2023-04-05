@@ -70,10 +70,10 @@ def get_all_tracks():
 def write_audio_feature_csv_files():
     all_tracks, track_names_and_ids = get_all_tracks()
 
-    # Split into 3 arrays, Spotify limits the length of ids requested
-    all_tracks_split_arr = np.array_split(all_tracks, 3)
+    # Split into 4 arrays, Spotify limits the length of ids requested
+    all_tracks_split_arr = np.array_split(all_tracks, 4)
 
-    for ids in all_tracks_split_arr:
+    for index, ids in enumerate(all_tracks_split_arr):
         audio_features_endpoint = f'https://api.spotify.com/v1/audio-features?ids={",".join(ids)}'
         audio_features_json = requests.get(
             audio_features_endpoint, headers=BEARER_AUTH).json()
@@ -82,7 +82,8 @@ def write_audio_feature_csv_files():
         try:
             with open('bts_songs_spotify_audio_features.csv', 'a') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-                writer.writeheader()
+                if index == 0:
+                    writer.writeheader()
                 writer.writerows(audio_features_json['audio_features'])
         except IOError:
             print("Error writing bts_songs_spotify_audio_features csv file")
@@ -96,8 +97,7 @@ def write_audio_feature_csv_files():
     # Remove extra id column
     final_df.drop('id', 1)
     final_df.to_csv('bts-songs-names-and-features-spotify.csv',
-                    index=False, encoding='utf-16')
-
+                    index=False)
 
 write_audio_feature_csv_files()
 
