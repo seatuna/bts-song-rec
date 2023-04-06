@@ -35,8 +35,8 @@ def get_ids(json_response, with_names=False):
 
 
 def get_all_album_ids():
-    bts_id = '3Nrfpe0tUJi4K4DXYWgMUX'
-    bts_album_endpoint = f'https://api.spotify.com/v1/artists/{bts_id}/albums'
+    BTS_ARTIST_ID = CONFIG['ids']['bts_artist_id']
+    bts_album_endpoint = f'https://api.spotify.com/v1/artists/{BTS_ARTIST_ID}/albums'
     bts_albums_json = requests.get(
         bts_album_endpoint, headers=BEARER_AUTH).json()
     return get_ids(bts_albums_json)
@@ -48,7 +48,7 @@ def get_all_tracks():
     all_track_names_and_ids = []
     total_tracks = 0
     for album_id in album_ids:
-        tracks_endpoint = f'https://api.spotify.com/v1/albums/{album_id}/tracks?limit=30'
+        tracks_endpoint = f'https://api.spotify.com/v1/albums/{album_id}/tracks?limit=40'
         bts_tracks_json = requests.get(
             tracks_endpoint, headers=BEARER_AUTH).json()
         all_album_tracks.append(get_ids(bts_tracks_json))
@@ -78,7 +78,7 @@ def write_audio_feature_csv_files():
         audio_features_json = requests.get(
             audio_features_endpoint, headers=BEARER_AUTH).json()
         csv_columns = audio_features_json['audio_features'][0].keys()
-        
+
         try:
             with open('bts_songs_spotify_audio_features.csv', 'a') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
@@ -95,9 +95,10 @@ def write_audio_feature_csv_files():
     final_df = pd.merge(name_and_id_df, bts_audio_features,
                         how='left', left_on=['spotify_id'], right_on=['id'])
     # Remove extra id column
-    final_df.drop('id', 1)
+    final_df.drop(columns='id')
     final_df.to_csv('bts-songs-names-and-features-spotify.csv',
                     index=False)
+
 
 write_audio_feature_csv_files()
 
