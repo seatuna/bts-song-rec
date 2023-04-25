@@ -8,6 +8,7 @@ The goal of this project is to create an app that will give you a BTS song recom
 The Spotify API provides data that quantifies audio features for requested tracks. I've pulled this data, saved it to CSV files, which will be uploaded into a SQL database for an API to use. 
 
 Current status: Python script to pull data from Spotify and save to CSV is complete.
+
 Next Steps:
 - Clean duplicates in CSV (will likely need to be done manually)
 - Use cosine similarity to calculate similarity of tracks to each other (functions already written in a gitignored jupyter notebook file, need to run it on a de-duped CSV)
