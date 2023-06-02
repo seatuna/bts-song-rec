@@ -72,7 +72,7 @@ def write_audio_feature_csv_files():
     all_tracks, track_names_and_ids = get_all_tracks()
     split_len = ceil(len(all_tracks) / 100)
 
-    # Split into 4 arrays, Spotify limits the length of ids requested
+    # Split into arrays, Spotify limits the length of ids requested
     all_tracks_split_arr = np.array_split(all_tracks, split_len)
 
     for index, ids in enumerate(all_tracks_split_arr):
@@ -81,11 +81,14 @@ def write_audio_feature_csv_files():
             audio_features_endpoint, headers=BEARER_AUTH).json()
         csv_columns = audio_features_json['audio_features'][0].keys()
 
+        if index == 0:
+            with open('bts_songs_spotify_audio_features.csv', 'w', encoding='utf-8') as new_csv:
+                writer = csv.DictWriter(new_csv, fieldnames=csv_columns)
+                writer.writeheader()
+
         try:
-            with open('bts_songs_spotify_audio_features', 'a') as csvfile:
+            with open('bts_songs_spotify_audio_features.csv', 'a', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-                if index == 0:
-                    writer.writeheader()
                 writer.writerows(audio_features_json['audio_features'])
         except IOError:
             print("Error writing bts_songs_spotify_audio_features csv file")
@@ -93,8 +96,13 @@ def write_audio_feature_csv_files():
     name_and_id_df = pd.DataFrame(
         track_names_and_ids, columns=['spotify_id', 'name'])
     bts_audio_features = pd.read_csv('bts_songs_spotify_audio_features.csv')
-    bts_audio_features.drop_duplicates(
-        subset="id", keep='first', inplace=True)
+
+    # Remove duplicate tracks
+    name_and_id_df['name_2'] = name_and_id_df['name'].str.strip()
+    name_and_id_df['name_2'] = name_and_id_df['name_2'].str.lower()
+    name_and_id_df.drop_duplicates(
+        subset="name_2", keep='first', inplace=True)
+    name_and_id_df.drop(columns='name_2')
 
     final_df = pd.merge(name_and_id_df, bts_audio_features,
                         how='left', left_on=['spotify_id'], right_on=['id'])
