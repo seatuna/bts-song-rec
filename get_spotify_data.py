@@ -6,6 +6,7 @@ from math import ceil
 import requests
 import numpy as np
 import pandas as pd
+from duplicate_song_ids import duplicate_song_ids
 
 CONFIG = configparser.ConfigParser()
 CONFIG.read('spotify.config')
@@ -68,6 +69,13 @@ def get_all_tracks():
     return all_tracks_flat, all_track_names_and_ids_flat
 
 
+def remove_duplicate_songs(df):
+    df['name_2'] = df['name'].str.strip()
+    df['name_2'] = df['name_2'].str.lower()
+    df.drop_duplicates(subset='name_2', keep='first', inplace=True)
+    return df[~df['spotify_id'].isin(duplicate_song_ids)]
+
+
 def write_audio_feature_csv_files():
     all_tracks, track_names_and_ids = get_all_tracks()
     split_len = ceil(len(all_tracks) / 100)
@@ -95,19 +103,13 @@ def write_audio_feature_csv_files():
 
     name_and_id_df = pd.DataFrame(
         track_names_and_ids, columns=['spotify_id', 'name'])
+    name_and_id_df = remove_duplicate_songs(name_and_id_df)
     bts_audio_features = pd.read_csv('bts_songs_spotify_audio_features.csv')
-
-    # Remove duplicate tracks
-    name_and_id_df['name_2'] = name_and_id_df['name'].str.strip()
-    name_and_id_df['name_2'] = name_and_id_df['name_2'].str.lower()
-    name_and_id_df.drop_duplicates(
-        subset="name_2", keep='first', inplace=True)
-    name_and_id_df.drop(columns='name_2')
 
     final_df = pd.merge(name_and_id_df, bts_audio_features,
                         how='left', left_on=['spotify_id'], right_on=['id'])
-    # Remove extra id column
-    final_df.drop(columns='id')
+    # Remove extra id and name column
+    final_df.drop(columns=['id', 'name_2'], inplace=True)
     final_df.to_csv('bts-songs-names-and-features-spotify.csv',
                     index=False, encoding='utf-8')
 

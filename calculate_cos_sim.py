@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
+
 def calculate_and_save_cos_sim():
     """Calculates the cosine similarity of songs based on the CSV file containing audio feature data and saves the results"""
     bts_songs_and_audio_features = pd.read_csv(
-        'bts-songs-names-and-features-spotify3.csv')
+        'bts-songs-names-and-features-spotify.csv')
 
     # key, loudness, tempo are wildly different values, probably need to normalize. Removed from features.
     audio_features = bts_songs_and_audio_features[[
