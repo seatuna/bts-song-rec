@@ -15,6 +15,7 @@ def calculate_and_save_cos_sim():
     # calculate cosine similarity and save
     cos_similarity = cosine_similarity(audio_features)
     np.save('bts-song-cos-sim.npy', cos_similarity)
+    print('cosine similarity calculated and saved to bts-song-cos-sim.npy')
 
 
 calculate_and_save_cos_sim()
