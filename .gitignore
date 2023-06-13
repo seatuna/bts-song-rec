@@ -4,4 +4,4 @@
 *.npy
 .vscode
 scripts/duplicate_song_ids.py
-__pycache__/*
+__pycache__
