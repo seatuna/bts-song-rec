@@ -3,5 +3,5 @@
 *.csv
 *.npy
 .vscode
-duplicate_song_ids.py
+scripts/duplicate_song_ids.py
 __pycache__/*

@@ -90,12 +90,12 @@ def write_audio_feature_csv_files():
         csv_columns = audio_features_json['audio_features'][0].keys()
 
         if index == 0:
-            with open('bts_songs_spotify_audio_features.csv', 'w', encoding='utf-8') as new_csv:
+            with open('data/bts_songs_spotify_audio_features.csv', 'w', encoding='utf-8') as new_csv:
                 writer = csv.DictWriter(new_csv, fieldnames=csv_columns)
                 writer.writeheader()
 
         try:
-            with open('bts_songs_spotify_audio_features.csv', 'a', encoding='utf-8') as csvfile:
+            with open('data/bts_songs_spotify_audio_features.csv', 'a', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
                 writer.writerows(audio_features_json['audio_features'])
         except IOError:
@@ -104,13 +104,14 @@ def write_audio_feature_csv_files():
     name_and_id_df = pd.DataFrame(
         track_names_and_ids, columns=['spotify_id', 'name'])
     name_and_id_df = remove_duplicate_songs(name_and_id_df)
-    bts_audio_features = pd.read_csv('bts_songs_spotify_audio_features.csv')
+    bts_audio_features = pd.read_csv(
+        'data/bts_songs_spotify_audio_features.csv')
 
     final_df = pd.merge(name_and_id_df, bts_audio_features,
                         how='left', left_on=['spotify_id'], right_on=['id'])
     # Remove extra id and name column
     final_df.drop(columns=['id', 'name_2'], inplace=True)
-    final_df.to_csv('bts-songs-names-and-features-spotify.csv',
+    final_df.to_csv('data/bts-songs-names-and-features-spotify.csv',
                     index=False, encoding='utf-8')
 
 
