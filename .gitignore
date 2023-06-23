@@ -2,6 +2,7 @@
 *.config
 *.csv
 *.npy
+*.xlsx
 .vscode
 scripts/duplicate_song_ids.py
 __pycache__

@@ -1,5 +1,5 @@
 import configparser
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, request
 import numpy as np
 import pandas as pd
 
@@ -52,6 +52,22 @@ def get_similar_songs(song_id):
     similar_songs_df = bts_songs.iloc[index_list]
 
     return jsonify(similar_songs_df.reset_index().to_dict(orient="records"))
+
+
+@app.route("/song/search", methods=["GET"])
+def search_song():
+    """Search for song title and return ids"""
+    args = request.args
+    query = args.get("query")
+    print(query)
+
+    bts_songs = pd.read_csv("data/bts-songs-names-and-features-spotify.csv")
+    filtered_songs = bts_songs[bts_songs["name"].str.lower().str.contains(query)]
+    search_results_list = filtered_songs[["name", "spotify_id"]].to_dict(
+        orient="records"
+    )
+
+    return jsonify(search_results_list)
 
 
 if __name__ == "__main__":
