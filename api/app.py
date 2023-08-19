@@ -1,5 +1,5 @@
 import configparser
-from flask import Flask, jsonify, abort, request
+from flask import Flask, jsonify, abort, request, make_response
 import numpy as np
 import pandas as pd
 
@@ -31,9 +31,12 @@ def get_song_data(song_id):
     return jsonify(song.reset_index().to_dict(orient="records")[0])
 
 
-@app.route("/song/<string:song_id>/similar", methods=["GET"])
+@app.route("/song/<string:song_id>/similar", methods=["GET", "OPTIONS"])
 def get_similar_songs(song_id):
     """Get first five similar songs"""
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+
     bts_songs = pd.read_csv("data/bts-songs-names-and-features-spotify.csv")
     song = bts_songs.loc[bts_songs["spotify_id"] == song_id]
 
@@ -51,7 +54,9 @@ def get_similar_songs(song_id):
     # Retrieve songs from songs df
     similar_songs_df = bts_songs.iloc[index_list]
 
-    return jsonify(similar_songs_df.reset_index().to_dict(orient="records"))
+    return _add_cors_to_response(
+        jsonify(similar_songs_df.reset_index().to_dict(orient="records"))
+    )
 
 
 @app.route("/song/search", methods=["GET"])
@@ -67,7 +72,20 @@ def search_song():
         orient="records"
     )
 
-    return jsonify(search_results_list)
+    return _add_cors_to_response(jsonify(search_results_list))
+
+
+def _build_cors_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    return response
+
+
+def _add_cors_to_response(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 
 
 if __name__ == "__main__":
