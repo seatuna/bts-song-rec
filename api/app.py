@@ -7,6 +7,7 @@ CONFIG = configparser.ConfigParser()
 CONFIG.read("app.config")
 HOST = CONFIG["dev"]["host"]
 PORT = CONFIG["dev"]["port"]
+ALLOWED_ORIGINS = CONFIG["dev"]["allowed_origins"]
 
 app = Flask(__name__)
 
@@ -63,7 +64,7 @@ def get_similar_songs(song_id):
 def search_song():
     """Search for song title and return ids"""
     args = request.args
-    query = args.get("query")
+    query = args.get("query").lower()
     print(query)
 
     bts_songs = pd.read_csv("data/bts-songs-names-and-features-spotify.csv")
@@ -77,14 +78,14 @@ def search_song():
 
 def _build_cors_preflight_response():
     response = make_response()
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers", "*")
-    response.headers.add("Access-Control-Allow-Methods", "*")
+    response.headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGINS)
+    response.headers.add("Access-Control-Allow-Headers", ["Content-Type"])
+    response.headers.add("Access-Control-Allow-Methods", ["GET"])
     return response
 
 
 def _add_cors_to_response(response):
-    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGINS)
     return response
 
 
